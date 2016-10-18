@@ -785,6 +785,11 @@ class CcBinary(CcTarget):
                 self._write_rule('%s.Append(LINKFLAGS="-Wl,--rpath-link=%s")' %
                         (self._env_name(), rpath_link))
 
+    def _strip_binary(self, env_name, var_name, realbinpath):
+        if getattr(self.blade.get_options(), "strip_symbols", False):
+            cmd="%s.AddPostAction(%s,'strip -s %s')"%(env_name,var_name,realbinpath)
+            self._write_rule(cmd)
+
     def _cc_binary(self):
         """_cc_binary rules. """
         env_name = self._env_name()
@@ -823,6 +828,19 @@ class CcBinary(CcTarget):
         self._write_rule('%s.Append(LINKFLAGS=str(version_obj[0]))' % env_name)
         self._write_rule('%s.Requires(%s, version_obj)' % (
                          env_name, var_name))
+
+        #add by jfd
+        #for add link for server
+        cwdpath=os.getcwd()
+        binpath=os.path.join(cwdpath,self.bin_path)
+        realbinpath=os.path.join(cwdpath,self._target_file_path())
+        self._strip_binary(env_name, var_name, realbinpath)
+        cmd="%s.AddPostAction(%s,'mkdir -p %s;ln -sbf %s %s')"%(env_name,var_name,binpath,realbinpath,binpath)
+        self._write_rule(cmd)
+        #add by jfd end
+        #self.addPreAction(env_name,self._objs_name())
+        #self.addPostAction(env_name,var_name)
+
 
     def _dynamic_cc_binary(self):
         """_dynamic_cc_binary. """

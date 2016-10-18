@@ -54,6 +54,8 @@ class Target(object):
         self.expanded_deps = []
         self.data = {}
 
+        self.bin_path = 'bin%s_%s'%(self.blade.get_options().m,self.blade.get_options().profile) #use for cc_binary
+
         self._check_name()
         self._check_kwargs(kwargs)
         self._check_srcs()
@@ -61,6 +63,21 @@ class Target(object):
         self._init_target_deps(deps)
         self.scons_rule_buf = []
         self.__cached_generate_header_files = None
+
+    def addPostAction(self,env,var):
+        action = self.data['postaction']
+        if not action or not action.strip():
+            return
+        cmd="%s.AddPostAction(%s,'%s')"%(env,var,action)
+        self._write_rule(cmd)
+
+    def addPreAction(self,env,var):
+        action = self.data['preaction']
+        if not action or not action.strip():
+            return
+        cmd="%s.AddPreAction(%s,'%s')"%(env,var,action)
+        self._write_rule(cmd)
+
 
     def _clone_env(self):
         """Clone target's environment. """
