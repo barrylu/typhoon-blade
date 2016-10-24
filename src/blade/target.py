@@ -325,6 +325,7 @@ class Target(object):
         new_path, new_name = self.__fill_path_name(path, name)
         return os.path.join(self.build_path, new_path, new_name)
 
+
     def __generate_header_files(self):
         for dkey in self.deps:
             dep = self.target_database[dkey]

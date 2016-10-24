@@ -242,8 +242,16 @@ class ProtoLibrary(CcTarget):
 
         sources = []
         obj_names = []
+        file_to_cp = []
+        cwdpath=os.getcwd()
+        real_path = os.path.join(cwdpath, self.path)
         for src in self.srcs:
             (proto_src, proto_hdr) = self._proto_gen_files(self.path, src)
+
+            real_proto_src = os.path.join(cwdpath,proto_src)
+            real_proto_hdr = os.path.join(cwdpath,proto_hdr)
+            file_to_cp.append(real_proto_src)
+            file_to_cp.append(real_proto_hdr)
 
             self._write_rule('%s.Proto(["%s", "%s"], "%s")' % (
                     env_name,
@@ -282,6 +290,10 @@ class ProtoLibrary(CcTarget):
         if (getattr(options, 'generate_dynamic', False) or
             self.data.get('build_dynamic', False)):
             self._dynamic_cc_library()
+
+        for file_ in file_to_cp :
+            cmd = "%s.AddPostAction(%s,'cp %s %s')" % (env_name, self._objs_name(), file_, real_path)
+            self._write_rule(cmd)
 
 
 def proto_library(name,
