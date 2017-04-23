@@ -138,8 +138,14 @@ def _load_build_file(source_dir, action_if_fail, processed_source_dirs, blade):
     build_file = os.path.join(source_dir, 'BUILD')
     if os.path.exists(build_file):
         try:
+            from mm_env import SRC_DIR
+            from mm_env import OUT_DIR 
+            from mm_env import BLADE_ROOT
+            from mm_env import WORK_DIR 
+
             # The magic here is that a BUILD file is a Python script,
             # which can be loaded and executed by execfile().
+            build_rules.register_function( SRC_DIR )
             execfile(build_file, build_rules.get_all(), None)
         except SystemExit:
             console.error_exit('%s: fatal error, exit...' % build_file)
